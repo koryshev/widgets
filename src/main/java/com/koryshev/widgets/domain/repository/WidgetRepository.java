@@ -23,5 +23,7 @@ public interface WidgetRepository {
 
     Page<Widget> findAll(Pageable pageable);
 
-    void updateZ(Integer z);
+    void shiftZ(Integer z);
+
+    void updateZ(Integer oldValue, Integer newValue);
 }

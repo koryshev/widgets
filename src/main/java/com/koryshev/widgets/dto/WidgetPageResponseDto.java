@@ -15,8 +15,12 @@ import java.util.List;
 @Setter
 @Builder
 public class WidgetPageResponseDto {
+
     private Integer totalElements;
+
     private Integer number;
+
     private Integer size;
+
     private List<WidgetResponseDto> content;
 }

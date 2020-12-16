@@ -1,6 +1,7 @@
 package com.koryshev.widgets.domain.repository;
 
 import com.koryshev.widgets.domain.model.Widget;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,7 @@ import java.util.UUID;
  *
  * @author Ivan Koryshev
  */
+@Profile("jpa")
 @Repository
 public interface JpaWidgetRepository extends WidgetRepository, JpaRepository<Widget, UUID> {
 
@@ -27,5 +29,10 @@ public interface JpaWidgetRepository extends WidgetRepository, JpaRepository<Wid
     @Override
     @Modifying
     @Query("update Widget w set w.z = w.z + 1, w.lastModifiedDate = CURRENT_TIMESTAMP where w.z = :z")
-    void updateZ(@Param(value = "z") Integer z);
+    void shiftZ(@Param(value = "z") Integer z);
+
+    @Override
+    @Modifying
+    @Query("update Widget w set w.z = :newValue, w.lastModifiedDate = CURRENT_TIMESTAMP where w.z = :oldValue")
+    void updateZ(@Param(value = "oldValue") Integer oldValue, @Param(value = "newValue") Integer newValue);
 }

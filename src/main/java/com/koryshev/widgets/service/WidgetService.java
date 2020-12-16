@@ -75,9 +75,11 @@ public class WidgetService {
             Integer z = widgetRepository.findMaxZ().orElse(0) + 1;
             log.info("Updating z-index for widget {}, setting value automatically to {}", widgetId, z);
             dto.setZ(z);
+            widgetRepository.updateZ(widget.getZ(), dto.getZ());
         } else if (!widget.getZ().equals(dto.getZ())) {
             log.info("Updating z-index for widget {}, from {} to {}", widgetId, widget.getZ(), dto.getZ());
             shift(dto.getZ());
+            widgetRepository.updateZ(widget.getZ(), dto.getZ());
         }
 
         widget.setX(dto.getX());
@@ -148,7 +150,7 @@ public class WidgetService {
                 .ifPresentOrElse(foundWidget -> {
                     log.info("Found existing widget with z-index {}, shifting it upwards", z);
                     shift(z + 1);
-                    widgetRepository.updateZ(z);
+                    widgetRepository.shiftZ(z);
                 }, () -> log.info("No widgets found with z-index {}, shifting finished", z));
     }
 }
