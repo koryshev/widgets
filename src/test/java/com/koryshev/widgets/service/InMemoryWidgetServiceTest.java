@@ -13,16 +13,15 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.koryshev.widgets.util.TestData.createWidgetRequestDtoWithZIndex;
 import static com.koryshev.widgets.util.TestData.createWidgetWithZIndex;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-@ActiveProfiles("jpa")
+@ActiveProfiles("in-memory")
 @SpringBootTest
-class JpaWidgetServiceTest {
+class InMemoryWidgetServiceTest {
 
     @Autowired
     private WidgetRepository widgetRepository;
@@ -36,7 +35,7 @@ class JpaWidgetServiceTest {
     }
 
     @Test
-    void shouldUpdateWidgetAtomicallyWithConcurrentReadsSupport() throws Exception {
+    void shouldUpdateWidgetAtomically() throws Exception {
         // Insert widgets
         int widgetsNumber = 1000;
         Widget firstWidget = widgetRepository.save(createWidgetWithZIndex(1));
@@ -48,31 +47,17 @@ class JpaWidgetServiceTest {
 
         // Submit update for firstWidget that will shift all other widgets upwards
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        AtomicBoolean updateFinished = new AtomicBoolean(false);
         executorService.submit(() -> {
             WidgetRequestDto requestDto = createWidgetRequestDtoWithZIndex(2);
             widgetService.update(firstWidget.getId(), requestDto);
-            updateFinished.set(true);
             log.info("Update finished");
         });
 
-        // While update is in progress read operations must return old value
-        while (!updateFinished.get()) {
-            log.info("Verifying concurrent read");
-            Widget shiftedWidget = widgetService.findOne(lastWidget.getId());
-            // Verify that widget moved upwards in the parallel thread still has an old z-index
-            // while update operation is in progress
-            if (shiftedWidget.getZ() == widgetsNumber) {
-                assertThat(updateFinished.get()).isFalse();
-            } else {
-                // For JPA repository, there is a short delay between update operation and setting the "updateFinished"
-                // flag to true so this extra Thread.sleep is needed to make the test stable
-                log.warn("Verifying of concurrent read failed, waiting 100ms and asserting if update is finished");
-                Thread.sleep(100);
-                assertThat(updateFinished.get()).isTrue();
-            }
-            Thread.sleep(50);
-        }
+        // Thread.sleep is added so that the update operation had a chance to acquire a lock before we try to read
+        Thread.sleep(5);
+        log.info("Verifying that concurrent read is blocked until update is finished");
+        Widget shiftedWidget = widgetService.findOne(lastWidget.getId());
+        assertThat(shiftedWidget.getZ()).isEqualTo(widgetsNumber + 1);
 
         log.info("Asserting read after update is finished");
         List<Widget> widgets = widgetService.findAll(0, widgetsNumber + 1).getContent();

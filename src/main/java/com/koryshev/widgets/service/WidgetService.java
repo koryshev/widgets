@@ -5,14 +5,13 @@ import com.koryshev.widgets.domain.repository.WidgetRepository;
 import com.koryshev.widgets.dto.WidgetRequestDto;
 import com.koryshev.widgets.dto.mapper.WidgetMapper;
 import com.koryshev.widgets.exception.WidgetNotFoundException;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -22,13 +21,14 @@ import java.util.UUID;
  * @author Ivan Koryshev
  */
 @Slf4j
-@Service
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class WidgetService {
 
-    private final WidgetMapper widgetMapper;
+    @Setter
+    private WidgetMapper widgetMapper;
 
-    private final WidgetRepository widgetRepository;
+    @Setter
+    private WidgetRepository widgetRepository;
 
     /**
      * Creates a new widget from data specified in a DTO.
@@ -36,7 +36,6 @@ public class WidgetService {
      * @param dto the DTO containing widget details
      * @return the created widget
      */
-    @Transactional
     public Widget create(WidgetRequestDto dto) {
         log.info("Creating widget, z-index {}", dto.getZ());
         Widget widget = widgetMapper.fromWidgetRequestDto(dto);
@@ -62,7 +61,6 @@ public class WidgetService {
      * @return the updated widget
      * @throws WidgetNotFoundException if such widget doesn't exist
      */
-    @Transactional
     public Widget update(UUID widgetId, WidgetRequestDto dto) {
         log.info("Updating widget {}, z-index {}", widgetId, dto.getZ());
         Widget widget = widgetRepository.findById(widgetId)
@@ -148,9 +146,9 @@ public class WidgetService {
     private void shift(Integer z) {
         widgetRepository.findByZ(z)
                 .ifPresentOrElse(foundWidget -> {
-                    log.info("Found existing widget with z-index {}, shifting it upwards", z);
                     shift(z + 1);
+                    log.info("Shifting upwards existing widget with z-index {}", z);
                     widgetRepository.shiftZ(z);
-                }, () -> log.info("No widgets found with z-index {}, shifting finished", z));
+                }, () -> log.info("No widgets found with z-index {}", z));
     }
 }
