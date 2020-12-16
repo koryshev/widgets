@@ -2,6 +2,7 @@ package com.koryshev.widgets.controller;
 
 import com.koryshev.widgets.domain.model.Widget;
 import com.koryshev.widgets.domain.repository.WidgetRepository;
+import com.koryshev.widgets.dto.WidgetPageResponseDto;
 import com.koryshev.widgets.dto.WidgetRequestDto;
 import com.koryshev.widgets.dto.WidgetResponseDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.koryshev.widgets.util.TestData.createWidgetRequestDtoWithZIndex;
@@ -178,7 +180,7 @@ class WidgetControllerTest {
     }
 
     @Test
-    void shouldGetAllWidgets() {
+    void shouldGetAllWidgetsWithDefaultPagination() {
         Widget widget1 = createWidgetWithZIndex(0);
         Widget widget2 = createWidgetWithZIndex(2);
         Widget widget3 = createWidgetWithZIndex(1);
@@ -186,15 +188,45 @@ class WidgetControllerTest {
         widgetRepository.save(widget2);
         widgetRepository.save(widget3);
 
-        ResponseEntity<WidgetResponseDto[]> response = restTemplate.exchange(
-                API_BASE_PATH, HttpMethod.GET, null, WidgetResponseDto[].class);
+        ResponseEntity<WidgetPageResponseDto> response = restTemplate.exchange(
+                API_BASE_PATH, HttpMethod.GET, null, WidgetPageResponseDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).hasSize(3);
+        assertThat(response.getBody().getTotalElements()).isEqualTo(3);
+        assertThat(response.getBody().getNumber()).isEqualTo(0);
+        assertThat(response.getBody().getSize()).isEqualTo(10);
+
+        List<WidgetResponseDto> widgets = response.getBody().getContent();
+        assertThat(widgets).hasSize(3);
         // assert sort order
-        assertThat(response.getBody()[0].getZ()).isEqualTo(0);
-        assertThat(response.getBody()[1].getZ()).isEqualTo(1);
-        assertThat(response.getBody()[2].getZ()).isEqualTo(2);
+        assertThat(widgets.get(0).getZ()).isEqualTo(0);
+        assertThat(widgets.get(1).getZ()).isEqualTo(1);
+        assertThat(widgets.get(2).getZ()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldGetAllWidgetsWithPagination() {
+        Widget widget1 = createWidgetWithZIndex(0);
+        Widget widget2 = createWidgetWithZIndex(2);
+        Widget widget3 = createWidgetWithZIndex(1);
+        widgetRepository.save(widget1);
+        widgetRepository.save(widget2);
+        widgetRepository.save(widget3);
+
+        ResponseEntity<WidgetPageResponseDto> response = restTemplate.exchange(
+                API_BASE_PATH + "?page=0&size=2", HttpMethod.GET, null, WidgetPageResponseDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getTotalElements()).isEqualTo(3);
+        assertThat(response.getBody().getNumber()).isEqualTo(0);
+        assertThat(response.getBody().getSize()).isEqualTo(2);
+
+        List<WidgetResponseDto> widgets = response.getBody().getContent();
+        assertThat(widgets).hasSize(2);
+        // assert sort order
+        assertThat(widgets.get(0).getZ()).isEqualTo(0);
+        assertThat(widgets.get(1).getZ()).isEqualTo(1);
     }
 }

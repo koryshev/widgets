@@ -51,7 +51,7 @@ class WidgetServiceTest {
 
         Widget newWidget = widgetService.create(requestDto);
 
-        List<Widget> widgets = widgetRepository.findAllByOrderByZAsc();
+        List<Widget> widgets = widgetService.findAll(0, 10).getContent();
         assertThat(widgets.get(0).getZ()).isEqualTo(1);
         assertThat(widgets.get(0).getId()).isEqualTo(widget1.getId());
         assertThat(widgets.get(1).getZ()).isEqualTo(2);
@@ -75,7 +75,7 @@ class WidgetServiceTest {
 
         Widget newWidget = widgetService.create(requestDto);
 
-        List<Widget> widgets = widgetRepository.findAllByOrderByZAsc();
+        List<Widget> widgets = widgetService.findAll(0, 10).getContent();
         assertThat(widgets.get(0).getZ()).isEqualTo(1);
         assertThat(widgets.get(0).getId()).isEqualTo(widget1.getId());
         assertThat(widgets.get(1).getZ()).isEqualTo(2);
@@ -99,7 +99,7 @@ class WidgetServiceTest {
 
         Widget newWidget = widgetService.create(requestDto);
 
-        List<Widget> widgets = widgetRepository.findAllByOrderByZAsc();
+        List<Widget> widgets = widgetService.findAll(0, 10).getContent();
         assertThat(widgets.get(0).getZ()).isEqualTo(1);
         assertThat(widgets.get(0).getId()).isEqualTo(widget1.getId());
         assertThat(widgets.get(1).getZ()).isEqualTo(2);
@@ -137,7 +137,7 @@ class WidgetServiceTest {
 
         widgetService.update(widget1.getId(), requestDto);
 
-        List<Widget> widgets = widgetRepository.findAllByOrderByZAsc();
+        List<Widget> widgets = widgetService.findAll(0, 10).getContent();
         assertThat(widgets.get(0).getZ()).isEqualTo(2);
         assertThat(widgets.get(0).getId()).isEqualTo(widget1.getId());
         assertThat(widgets.get(1).getZ()).isEqualTo(3);
@@ -159,7 +159,7 @@ class WidgetServiceTest {
 
         widgetService.update(widget1.getId(), requestDto);
 
-        List<Widget> widgets = widgetRepository.findAllByOrderByZAsc();
+        List<Widget> widgets = widgetService.findAll(0, 10).getContent();
         assertThat(widgets.get(0).getZ()).isEqualTo(2);
         assertThat(widgets.get(0).getId()).isEqualTo(widget1.getId());
         assertThat(widgets.get(1).getZ()).isEqualTo(5);
@@ -181,7 +181,7 @@ class WidgetServiceTest {
 
         widgetService.update(widget1.getId(), requestDto);
 
-        List<Widget> widgets = widgetRepository.findAllByOrderByZAsc();
+        List<Widget> widgets = widgetService.findAll(0, 10).getContent();
         assertThat(widgets.get(0).getZ()).isEqualTo(2);
         assertThat(widgets.get(0).getId()).isEqualTo(widget1.getId());
         assertThat(widgets.get(1).getZ()).isEqualTo(3);
@@ -217,7 +217,7 @@ class WidgetServiceTest {
         widgetRepository.save(widget2);
         widgetRepository.save(widget3);
 
-        List<Widget> widgets = widgetService.findAll();
+        List<Widget> widgets = widgetService.findAll(0, 10).getContent();
 
         assertThat(widgets).hasSize(3);
         // assert sort order

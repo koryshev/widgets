@@ -3,14 +3,17 @@ package com.koryshev.widgets.service;
 import com.koryshev.widgets.domain.model.Widget;
 import com.koryshev.widgets.domain.repository.WidgetRepository;
 import com.koryshev.widgets.dto.WidgetRequestDto;
-import com.koryshev.widgets.exception.WidgetNotFoundException;
 import com.koryshev.widgets.dto.mapper.WidgetMapper;
+import com.koryshev.widgets.exception.WidgetNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -127,10 +130,11 @@ public class WidgetService {
      *
      * @return the widgets list
      */
-    public List<Widget> findAll() {
-        log.info("Getting all widgets");
-        List<Widget> widgets = widgetRepository.findAllByOrderByZAsc();
-        log.info("Returning {} widgets", widgets.size());
+    public Page<Widget> findAll(Integer page, Integer size) {
+        log.info("Getting all widgets, page {}, size {}", page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "z");
+        Page<Widget> widgets = widgetRepository.findAll(pageable);
+        log.info("Returning {} widgets", widgets.getNumberOfElements());
         return widgets;
     }
 

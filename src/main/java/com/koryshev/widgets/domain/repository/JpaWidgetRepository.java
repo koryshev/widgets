@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,9 +17,6 @@ import java.util.UUID;
  */
 @Repository
 public interface JpaWidgetRepository extends WidgetRepository, JpaRepository<Widget, UUID> {
-
-    @Override
-    List<Widget> findAllByOrderByZAsc();
 
     @Override
     Optional<Widget> findByZ(Integer z);
