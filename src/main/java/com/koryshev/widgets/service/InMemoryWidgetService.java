@@ -13,6 +13,11 @@ import java.util.UUID;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * Manages {@link Widget} entries using an in-memory implementation of @{link {@link WidgetRepository}}.
+ *
+ * @author Ivan Koryshev
+ */
 @Slf4j
 @Profile("in-memory")
 @Service

@@ -37,8 +37,7 @@ public class InMemoryWidgetRepository implements WidgetRepository {
             widget.setCreatedDate(createdDate);
         }
 
-        Instant lastModifiedDate = Instant.now();
-        widget.setLastModifiedDate(lastModifiedDate);
+        widget.setLastModifiedDate(Instant.now());
 
         repository.put(widget.getId(), widget);
         orderedRepository.put(widget.getZ(), widget);

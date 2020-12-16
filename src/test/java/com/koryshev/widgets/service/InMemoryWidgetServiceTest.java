@@ -35,7 +35,7 @@ class InMemoryWidgetServiceTest {
     }
 
     @Test
-    void shouldUpdateWidgetAtomically() throws Exception {
+    void shouldUpdateWidgetAtomicallyWithBlockingConcurrentReads() throws Exception {
         // Insert widgets
         int widgetsNumber = 1000;
         Widget firstWidget = widgetRepository.save(createWidgetWithZIndex(1));

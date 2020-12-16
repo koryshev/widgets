@@ -7,6 +7,11 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Defines possible operations on {@link Widget}.
+ *
+ * @author Ivan Koryshev
+ */
 public interface WidgetRepository {
 
     Widget save(Widget widget);

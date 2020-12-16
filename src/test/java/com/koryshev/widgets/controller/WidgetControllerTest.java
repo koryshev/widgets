@@ -108,6 +108,7 @@ class WidgetControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getZ()).isEqualTo(2);
+        assertThat(response.getBody().getLastModifiedDate()).isAfter(response.getBody().getCreatedDate());
     }
 
     @Test

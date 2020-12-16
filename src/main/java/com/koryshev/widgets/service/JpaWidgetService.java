@@ -11,6 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Manages {@link Widget} entries using a JPA implementation of @{link {@link WidgetRepository}}.
+ *
+ * @author Ivan Koryshev
+ */
 @Profile("jpa")
 @Service
 @Transactional
