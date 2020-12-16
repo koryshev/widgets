@@ -1,6 +1,7 @@
 package com.koryshev.widgets.contoller;
 
 import com.koryshev.widgets.domain.model.Widget;
+import com.koryshev.widgets.dto.WidgetPageRequestDto;
 import com.koryshev.widgets.dto.WidgetPageResponseDto;
 import com.koryshev.widgets.dto.WidgetRequestDto;
 import com.koryshev.widgets.dto.WidgetResponseDto;
@@ -89,15 +90,16 @@ public class WidgetController {
     }
 
     /**
-     * Returns a list of all widgets.
+     * Returns a list of widgets based on the specified filter.
      *
      * @return the widgets list
      */
-    @GetMapping
-    public WidgetPageResponseDto get(
+    @PostMapping("/filter")
+    public WidgetPageResponseDto filter(
             @Min(0L) @Valid @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
-            @Min(0L) @Max(500L) @Valid @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
-        Page<Widget> widgetsPage = widgetService.findAll(page, size);
+            @Min(0L) @Max(500L) @Valid @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
+            @RequestBody(required = false) @Valid WidgetPageRequestDto dto) {
+        Page<Widget> widgetsPage = widgetService.findAll(page, size, dto);
         List<WidgetResponseDto> content = widgetMapper.toWidgetResponseDto(widgetsPage.getContent());
 
         return WidgetPageResponseDto.builder()

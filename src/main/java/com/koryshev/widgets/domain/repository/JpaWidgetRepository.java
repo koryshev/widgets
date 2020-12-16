@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,4 +36,7 @@ public interface JpaWidgetRepository extends WidgetRepository, JpaRepository<Wid
     @Modifying
     @Query("update Widget w set w.z = :newValue, w.lastModifiedDate = CURRENT_TIMESTAMP where w.z = :oldValue")
     void updateZ(@Param(value = "oldValue") Integer oldValue, @Param(value = "newValue") Integer newValue);
+
+    @Override
+    List<Widget> findAllByWidthLessThanEqualAndHeightLessThanEqualOrderByZAsc(Integer width, Integer height);
 }

@@ -4,6 +4,7 @@ import com.koryshev.widgets.domain.model.Widget;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,4 +32,6 @@ public interface WidgetRepository {
     void shiftZ(Integer z);
 
     void updateZ(Integer oldValue, Integer newValue);
+
+    List<Widget> findAllByWidthLessThanEqualAndHeightLessThanEqualOrderByZAsc(Integer width, Integer height);
 }

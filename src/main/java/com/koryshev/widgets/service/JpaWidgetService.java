@@ -2,6 +2,7 @@ package com.koryshev.widgets.service;
 
 import com.koryshev.widgets.domain.model.Widget;
 import com.koryshev.widgets.domain.repository.WidgetRepository;
+import com.koryshev.widgets.dto.WidgetPageRequestDto;
 import com.koryshev.widgets.dto.WidgetRequestDto;
 import com.koryshev.widgets.dto.mapper.WidgetMapper;
 import org.springframework.context.annotation.Profile;
@@ -48,7 +49,7 @@ public class JpaWidgetService extends WidgetService {
     }
 
     @Override
-    public Page<Widget> findAll(Integer page, Integer size) {
-        return super.findAll(page, size);
+    public Page<Widget> findAll(Integer page, Integer size, WidgetPageRequestDto dto) {
+        return super.findAll(page, size, dto);
     }
 }

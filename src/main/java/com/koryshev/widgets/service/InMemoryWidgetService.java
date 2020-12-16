@@ -2,6 +2,7 @@ package com.koryshev.widgets.service;
 
 import com.koryshev.widgets.domain.model.Widget;
 import com.koryshev.widgets.domain.repository.WidgetRepository;
+import com.koryshev.widgets.dto.WidgetPageRequestDto;
 import com.koryshev.widgets.dto.WidgetRequestDto;
 import com.koryshev.widgets.dto.mapper.WidgetMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -72,10 +73,10 @@ public class InMemoryWidgetService extends WidgetService {
     }
 
     @Override
-    public Page<Widget> findAll(Integer page, Integer size) {
+    public Page<Widget> findAll(Integer page, Integer size, WidgetPageRequestDto dto) {
         try {
             lock.readLock().lock();
-            return super.findAll(page, size);
+            return super.findAll(page, size, dto);
         } finally {
             lock.readLock().unlock();
         }

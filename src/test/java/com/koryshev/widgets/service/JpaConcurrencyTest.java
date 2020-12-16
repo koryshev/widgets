@@ -75,7 +75,7 @@ class JpaConcurrencyTest {
         }
 
         log.info("Asserting read after update is finished");
-        List<Widget> widgets = widgetService.findAll(0, widgetsNumber + 1).getContent();
+        List<Widget> widgets = widgetService.findAll(0, widgetsNumber + 1, null).getContent();
         assertThat(widgets).hasSize(widgetsNumber);
         assertThat(widgets.get(widgetsNumber - 1).getZ()).isEqualTo(widgetsNumber + 1);
     }

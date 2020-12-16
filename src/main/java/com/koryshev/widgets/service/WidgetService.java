@@ -2,18 +2,25 @@ package com.koryshev.widgets.service;
 
 import com.koryshev.widgets.domain.model.Widget;
 import com.koryshev.widgets.domain.repository.WidgetRepository;
+import com.koryshev.widgets.dto.WidgetPageRequestDto;
 import com.koryshev.widgets.dto.WidgetRequestDto;
 import com.koryshev.widgets.dto.mapper.WidgetMapper;
 import com.koryshev.widgets.exception.WidgetNotFoundException;
+import com.koryshev.widgets.util.WidgetUtil;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.awt.*;
+import java.util.List;
 import java.util.UUID;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Manages {@link Widget} entries.
@@ -126,13 +133,72 @@ public class WidgetService {
     }
 
     /**
+     * Returns a list of widgets based on the specified filter.
+     *
+     * @return the widgets list
+     */
+    public Page<Widget> findAll(Integer page, Integer size, WidgetPageRequestDto dto) {
+        log.info("Getting all widgets, page {}, size {}", page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "z");
+
+        if (dto == null) {
+            return findAll(pageable);
+        }
+
+        // Find center, width and height for the specified rectangle
+        Integer x = (dto.getXBottomLeft() + dto.getXTopRight()) / 2;
+        Integer y = (dto.getYBottomLeft() + dto.getYTopRight()) / 2;
+        Integer width = dto.getXTopRight() - dto.getXBottomLeft();
+        Integer height = dto.getYTopRight() - dto.getYBottomLeft();
+
+        // Filter widgets by width and height
+        List<Widget> widgets =
+                widgetRepository.findAllByWidthLessThanEqualAndHeightLessThanEqualOrderByZAsc(width, height);
+        if (widgets.isEmpty()) {
+            log.info("No matching widgets found, returning empty page");
+            return Page.empty(pageable);
+        }
+        log.info("Filtered {} widgets by width and height", widgets.size());
+
+        // Apply filtering
+        Rectangle rectangle = WidgetUtil.createRectangle(x, y, width, height);
+        List<Widget> filteredWidgets = widgets.stream()
+                .filter(widget -> {
+                    Rectangle widgetRectangle = WidgetUtil.createRectangle(
+                            widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight());
+                    return WidgetUtil.rectangleContains(rectangle, widgetRectangle);
+                })
+                .collect(toList());
+        if (filteredWidgets.isEmpty()) {
+            log.info("No matching widgets found, returning empty page");
+            return Page.empty(pageable);
+        }
+        log.info("Filtered {} widgets for specified rectangle", filteredWidgets.size());
+
+        // Apply pagination
+        int total = filteredWidgets.size();
+        int from = (int) pageable.getOffset();
+        int to = from + pageable.getPageSize();
+
+        if (from > total) {
+            log.info("No matching widgets found, returning empty page");
+            return Page.empty(pageable);
+        }
+        if (to > total) {
+            to = total;
+        }
+
+        List<Widget> content = filteredWidgets.subList(from, to);
+        log.info("Returning {} widgets", content.size());
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    /**
      * Returns a list of all widgets.
      *
      * @return the widgets list
      */
-    public Page<Widget> findAll(Integer page, Integer size) {
-        log.info("Getting all widgets, page {}, size {}", page, size);
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "z");
+    private Page<Widget> findAll(Pageable pageable) {
         Page<Widget> widgets = widgetRepository.findAll(pageable);
         log.info("Returning {} widgets", widgets.getNumberOfElements());
         return widgets;

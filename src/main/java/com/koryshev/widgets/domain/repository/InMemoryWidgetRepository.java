@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * An in-memory repository for accessing {@link Widget}.
  *
@@ -83,7 +85,7 @@ public class InMemoryWidgetRepository implements WidgetRepository {
         int to = from + pageable.getPageSize();
 
         if (from > total) {
-            return Page.empty();
+            return Page.empty(pageable);
         }
         if (to > total) {
             to = total;
@@ -107,5 +109,13 @@ public class InMemoryWidgetRepository implements WidgetRepository {
 
         orderedRepository.put(widget.getZ(), widget);
         repository.put(widget.getId(), widget);
+    }
+
+    @Override
+    public List<Widget> findAllByWidthLessThanEqualAndHeightLessThanEqualOrderByZAsc(Integer width, Integer height) {
+        return orderedRepository.values()
+                .stream()
+                .filter(widget -> widget.getWidth() <= width && widget.getHeight() <= height)
+                .collect(toList());
     }
 }

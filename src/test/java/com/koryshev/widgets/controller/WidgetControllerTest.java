@@ -2,6 +2,7 @@ package com.koryshev.widgets.controller;
 
 import com.koryshev.widgets.domain.model.Widget;
 import com.koryshev.widgets.domain.repository.WidgetRepository;
+import com.koryshev.widgets.dto.WidgetPageRequestDto;
 import com.koryshev.widgets.dto.WidgetPageResponseDto;
 import com.koryshev.widgets.dto.WidgetRequestDto;
 import com.koryshev.widgets.dto.WidgetResponseDto;
@@ -11,13 +12,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 import java.util.UUID;
 
+import static com.koryshev.widgets.util.TestData.createWidget;
+import static com.koryshev.widgets.util.TestData.createWidgetPageRequestDto;
 import static com.koryshev.widgets.util.TestData.createWidgetRequestDtoWithZIndex;
 import static com.koryshev.widgets.util.TestData.createWidgetWithZIndex;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -189,8 +196,12 @@ class WidgetControllerTest {
         widgetRepository.save(widget2);
         widgetRepository.save(widget3);
 
+        // If request body is empty, the "Content-Type" header has to be set explicitly
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
         ResponseEntity<WidgetPageResponseDto> response = restTemplate.exchange(
-                API_BASE_PATH, HttpMethod.GET, null, WidgetPageResponseDto.class);
+                API_BASE_PATH + "/filter", HttpMethod.POST, entity, WidgetPageResponseDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -200,7 +211,7 @@ class WidgetControllerTest {
 
         List<WidgetResponseDto> widgets = response.getBody().getContent();
         assertThat(widgets).hasSize(3);
-        // assert sort order
+        // Assert sort order
         assertThat(widgets.get(0).getZ()).isEqualTo(0);
         assertThat(widgets.get(1).getZ()).isEqualTo(1);
         assertThat(widgets.get(2).getZ()).isEqualTo(2);
@@ -215,8 +226,12 @@ class WidgetControllerTest {
         widgetRepository.save(widget2);
         widgetRepository.save(widget3);
 
+        // If request body is empty, the "Content-Type" header has to be set explicitly
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
         ResponseEntity<WidgetPageResponseDto> response = restTemplate.exchange(
-                API_BASE_PATH + "?page=0&size=2", HttpMethod.GET, null, WidgetPageResponseDto.class);
+                API_BASE_PATH + "/filter?page=0&size=2", HttpMethod.POST, entity, WidgetPageResponseDto.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -226,8 +241,37 @@ class WidgetControllerTest {
 
         List<WidgetResponseDto> widgets = response.getBody().getContent();
         assertThat(widgets).hasSize(2);
-        // assert sort order
+        // Assert sort order
         assertThat(widgets.get(0).getZ()).isEqualTo(0);
         assertThat(widgets.get(1).getZ()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldGetAllWidgetsWithPaginationAndFiltering() {
+        Widget widget1 = createWidget(50, 50, 2, 100, 100);
+        Widget widget2 = createWidget(50, 100, 1, 100, 100);
+        Widget widget3 = createWidget(100, 100, 3, 100, 100);
+        Widget widget4 = createWidget(50, 50, 4, 50, 50);
+        widgetRepository.save(widget1);
+        widgetRepository.save(widget2);
+        widgetRepository.save(widget3);
+        widgetRepository.save(widget4);
+
+        WidgetPageRequestDto dto = createWidgetPageRequestDto(0, 0, 100, 150);
+        HttpEntity<WidgetPageRequestDto> entity = new HttpEntity<>(dto);
+        ResponseEntity<WidgetPageResponseDto> response = restTemplate.exchange(
+                API_BASE_PATH + "/filter?page=0&size=2", HttpMethod.POST, entity, WidgetPageResponseDto.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getTotalElements()).isEqualTo(3);
+        assertThat(response.getBody().getNumber()).isEqualTo(0);
+        assertThat(response.getBody().getSize()).isEqualTo(2);
+
+        List<WidgetResponseDto> widgets = response.getBody().getContent();
+        assertThat(widgets).hasSize(2);
+        // Assert sort order
+        assertThat(widgets.get(0).getZ()).isEqualTo(1);
+        assertThat(widgets.get(1).getZ()).isEqualTo(2);
     }
 }
