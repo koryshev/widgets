@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -19,9 +18,8 @@ import static com.koryshev.widgets.util.TestData.createWidgetWithZIndex;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-@ActiveProfiles("in-memory")
 @SpringBootTest
-class InMemoryWidgetServiceTest {
+class InMemoryConcurrencyTest {
 
     @Autowired
     private WidgetRepository widgetRepository;
